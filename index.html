@@ -81,7 +81,7 @@
         .modal-content { background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 400px; }
         .modal-content h2 { color: var(--success); margin-bottom: 10px; }
 
-        /* SPINNER LOADING OVERLAY (ELEM BARU) */
+        /* SPINNER LOADING OVERLAY */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -120,7 +120,7 @@
 </head>
 <body>
 
-<!-- COMPONENT BARU: LOADING OVERLAY -->
+<!-- COMPONENT: LOADING OVERLAY -->
 <div id="loading-overlay" class="loading-overlay">
     <div class="spinner"></div>
     <div class="loading-text">Sedang memproses, sila tunggu...</div>
@@ -135,7 +135,7 @@
     </div>
     <div class="form-group">
         <label>Kod OTP</label>
-        <input type="password" id="login-otp" placeholder="Masukkan 4 digit OTP">
+        <input type="tel" id="login-otp" placeholder="Masukkan 4 digit OTP">
     </div>
     <button class="btn-login" onclick="handleLogin()">Log Masuk</button>
     <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div>
@@ -170,13 +170,13 @@
     </div>
 
     <div class="reward-section">
-        <div class="star-counter">Jumlah Bintang <span id="current-child-name">Anak</span>: <span id="star-count">0</span> / 20</div>
+        <div class="star-counter">Jumlah Bintang <span id="current-child-name">Anak</span> (<span id="current-day-label">Hari</span>): <span id="star-count">0</span> / 20</div>
         <div class="star-grid" id="star-grid"></div>
-        <p style="font-size: 13px; color: #4a5568;"><b>Ganjaran (Cukup 20 Bintang):</b> Pilihan Aktiviti Keluarga Istimewa! 🎉</p>
+        <p style="font-size: 13px; color: #4a5568;"><b>Ganjaran Hari Ini (Cukup 20 Bintang):</b> Pilihan Aktiviti Keluarga Istimewa! 🎉</p>
     </div>
 
     <div class="day-selector">
-        <button class="day-btn active" onclick="switchDay('Isnin')">Isnin</button>
+        <button class="day-btn" onclick="switchDay('Isnin')">Isnin</button>
         <button class="day-btn" onclick="switchDay('Selasa')">Selasa</button>
         <button class="day-btn" onclick="switchDay('Rabu')">Rabu</button>
         <button class="day-btn" onclick="switchDay('Khamis')">Khamis</button>
@@ -189,24 +189,22 @@
 
     <div class="action-box">
 		<button id="btn-add-star" class="btn btn-star" onclick="addStarManual()">+ Beri 1 Bintang Khas ⭐</button>
-        <button class="btn btn-reset" onclick="resetApp()">Reset Skor Anak Ini</button>
+        <button class="btn btn-reset" onclick="resetApp()">Reset Skor Anak Ini (Hari Ini)</button>
     </div>
 </div>
 
 <div class="modal" id="reward-modal">
     <div class="modal-content">
-        <h2>🎉 TAHNIAH! 🎉</h2>
-        <p>Hebatnya! <span id="modal-child-name">Anak</span> telah berjaya mengumpul 20 bintang!</p>
+        <h2>🎉 TAHNIAH HARIAN! 🎉</h2>
+        <p>Hebatnya! <span id="modal-child-name">Anak</span> berjaya kumpul 20 bintang pada hari <span id="modal-day-name">Hari</span>!</p>
         <p style="margin: 15px 0; font-weight: bold; color: #dd6b20;">Masa untuk Pilihan Aktiviti Keluarga Istimewa! 😍</p>
         <button class="btn" style="background: var(--primary); color: white;" onclick="closeModal()">Teruskan</button>
     </div>
 </div>
 
 <script>
-  // Selamat kerana dihalang oleh Netlify Function proxy rahsia
   const API_URL = "/.netlify/functions/api";
 
-  // Konfigurasi Rutin & Aktiviti[cite: 1]
   const baseRoutine = [
       { time: "06:30 AM", title: "Bangun, kemas tempat tidur, gosok gigi, mandi", focus: "Disiplin & Berdikari" },
       { time: "07:00 AM", title: "Sarapan bersama keluarga", focus: "Komunikasi & Adab Makan" },
@@ -236,14 +234,30 @@
   let userSession = { phone: "", children: [], activeChild: "" };
   const daysMapping = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
   let currentDay = daysMapping[new Date().getDay()];
-  let appState = { stars: 0, completedTasks: {} };
+  
+  // appState.stars sekarang diubah kepada struktur Objek berasingan mengikut hari
+  let appState = { stars: {}, completedTasks: {} };
 
-  // Fungsi utiliti kawalan loading spinner
   function showLoading(show) {
       document.getElementById("loading-overlay").style.display = show ? "flex" : "none";
   }
 
-  // --- LOGIK PENGURUSAN LOGIN ---
+  // Ambil jumlah bintang khusus untuk hari yang sedang aktif (Lalai: 0)
+  function getCurrentDayStars() {
+      if (typeof appState.stars === 'object' && appState.stars !== null) {
+          return appState.stars[currentDay] || 0;
+      }
+      return 0;
+  }
+
+  // Set jumlah bintang khusus untuk hari yang sedang aktif
+  function setCurrentDayStars(value) {
+      if (typeof appState.stars !== 'object' || appState.stars === null) {
+          appState.stars = {};
+      }
+      appState.stars[currentDay] = value;
+  }
+
   async function handleLogin() {
       const phone = document.getElementById("login-phone").value.trim();
       const otp = document.getElementById("login-otp").value.trim();
@@ -296,16 +310,31 @@
       location.reload();
   }
 
-  // --- LOGIK AMBIL & SIMPAN DATA PERIBADI ---
   async function loadChildData() {
-      // Optimistic Update: Tukar nama di paparan dengan cepat
       document.getElementById("current-child-name").innerText = userSession.activeChild;
       
       showLoading(true);
       try {
           const res = await fetch(`${API_URL}?action=getData&phone=${userSession.phone}&child=${userSession.activeChild}`);
           const data = await res.json();
-          appState.stars = data.stars || 0;
+          
+          // Memastikan data appState.stars diuruskan sebagai Objek
+          if (data.stars && typeof data.stars === 'string') {
+              try {
+                  appState.stars = JSON.parse(data.stars);
+              } catch(e) {
+                  appState.stars = {};
+              }
+          } else if (data.stars && typeof data.stars === 'object') {
+              appState.stars = data.stars;
+          } else {
+              // Jika ia adalah nombor tunggal (data lama di DB), tukarkannya menjadi format hari semasa sebagai fallback
+              appState.stars = {};
+              if (typeof data.stars === 'number') {
+                  appState.stars[currentDay] = data.stars;
+              }
+          }
+
           appState.completedTasks = data.completedTasks || {};
           renderStars();
           renderTasks();
@@ -318,7 +347,7 @@
 
   async function switchChild(childName) {
       userSession.activeChild = childName;
-      document.getElementById("current-child-name").innerText = childName; // visual dikemaskini awal
+      document.getElementById("current-child-name").innerText = childName;
       
       showLoading(true);
       try {
@@ -336,7 +365,6 @@
 
   async function saveProgress() {
       renderStars();
-      // Proses simpanan latar belakang tanpa mengganggu penggunaan (tidak menggunakan showLoading untuk kelancaran)
       try {
           await fetch(API_URL, {
               method: 'POST',
@@ -345,7 +373,8 @@
                   action: "saveData",
                   phone: userSession.phone,
                   child: userSession.activeChild,
-                  stars: appState.stars,
+                  // Hantar keseluruhan objek bintang (semua hari)
+                  stars: typeof appState.stars === 'object' ? JSON.stringify(appState.stars) : appState.stars,
                   completedTasks: appState.completedTasks
               })
           });
@@ -354,25 +383,26 @@
       }
   }
 
-  // --- LOGIK RENDER & SKOR ---
   function renderStars() {
+      const currentStars = getCurrentDayStars();
+      document.getElementById('current-day-label').innerText = currentDay;
+
       const grid = document.getElementById('star-grid');
       grid.innerHTML = '';
       for (let i = 1; i <= 20; i++) {
           const slot = document.createElement('div');
-          slot.className = `star-slot ${i <= appState.stars ? 'earned' : ''}`;
-          slot.innerHTML = i <= appState.stars ? '⭐' : i;
+          slot.className = `star-slot ${i <= currentStars ? 'earned' : ''}`;
+          slot.innerHTML = i <= currentStars ? '⭐' : i;
           grid.appendChild(slot);
       }
-      document.getElementById('star-count').innerText = appState.stars;
+      document.getElementById('star-count').innerText = currentStars;
       
-      // --- LOGIK BARU UNTUK DISABLE BUTANG APABILA MENCECAH HAD 20 ---
       const addStarBtn = document.getElementById('btn-add-star');
       if (addStarBtn) {
-          if (appState.stars >= 20) {
+          if (currentStars >= 20) {
               addStarBtn.disabled = true;
-              addStarBtn.style.opacity = "0.5";       // Jadikan butang sedikit kabur
-              addStarBtn.style.cursor = "not-allowed"; // Tukar ikon tetikus kepada ikon 'dilarang'
+              addStarBtn.style.opacity = "0.5";
+              addStarBtn.style.cursor = "not-allowed";
           } else {
               addStarBtn.disabled = false;
               addStarBtn.style.opacity = "1";
@@ -380,19 +410,20 @@
           }
       }
       
-      if (appState.stars >= 20) {
+      if (currentStars >= 20) {
           document.getElementById('modal-child-name').innerText = userSession.activeChild;
+          document.getElementById('modal-day-name').innerText = currentDay;
           document.getElementById('reward-modal').style.display = 'flex';
       }
   }
 
   function renderTasks() {
       document.querySelectorAll('.day-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.innerText === currentDay);
-    });
+          btn.classList.toggle('active', btn.innerText === currentDay);
+      });
 
-    const container = document.getElementById('task-container');
-    container.innerHTML = '';
+      const container = document.getElementById('task-container');
+      container.innerHTML = '';
 
       baseRoutine.forEach((item, index) => {
           let title = item.title;
@@ -428,53 +459,61 @@
 
   function toggleTask(taskId, checkbox) {
       appState.completedTasks[taskId] = checkbox.checked;
+      let currentStars = getCurrentDayStars();
+
       if (checkbox.checked) {
-          if (appState.stars < 20) appState.stars++;
+          if (currentStars < 20) currentStars++;
       } else {
-          if (appState.stars > 0) appState.stars--;
+          if (currentStars > 0) currentStars--;
       }
+      
+      setCurrentDayStars(currentStars);
       checkbox.closest('.task-item').classList.toggle('completed', checkbox.checked);
       saveProgress();
   }
 
   window.switchDay = function(day) {
       currentDay = day;
-      document.querySelectorAll('.day-btn').forEach(btn => {
-          btn.classList.toggle('active', btn.innerText === day);
-      });
+      renderStars(); // Render bintang mengikut data hari baru
       renderTasks();
   }
 
   window.addStarManual = function() {
-      if (appState.stars < 20) {
-          appState.stars++;
+      let currentStars = getCurrentDayStars();
+      if (currentStars < 20) {
+          currentStars++;
+          setCurrentDayStars(currentStars);
           saveProgress();
       }
   }
 
   window.resetApp = async function() {
-      if (confirm(`Adakah anda pasti mahu set semula rekod bagi ${userSession.activeChild}?`)) {
-          appState = { stars: 0, completedTasks: {} };
+      if (confirm(`Adakah anda pasti mahu set semula rekod bintang & tugasan bagi ${userSession.activeChild} pada hari ${currentDay}?`)) {
+          // Hanya set semula bintang hari terpilih sahaja
+          setCurrentDayStars(0);
+          
+          // Padam penandaan tugasan (completed tasks) bagi hari terpilih sahaja
+          for (let key in appState.completedTasks) {
+              if (key.startsWith(`${currentDay}-`)) {
+                  appState.completedTasks[key] = false;
+              }
+          }
+          
           showLoading(true);
           await saveProgress();
-          window.switchDay('Isnin');
+          renderTasks();
           showLoading(false);
       }
   }
 
   window.closeModal = function() { document.getElementById('reward-modal').style.display = 'none'; }
 
-  // --- LOGIK AUTO LOGIN APABILA REFRESH PAGE ---
   async function checkAutoLogin() {
       const savedPhone = localStorage.getItem("harian_phone");
-      
-      // Jika tiada data telefon disimpan, kekal di skrin login
       if (!savedPhone) return;
 
       showLoading(true);
       try {
-          // Kita hantar request ke API untuk dapatkan semula senarai anak & anak aktif
-          // Menggunakan 'autologin' sebagai flag supaya tidak perlu memasukkan OTP semula
           const res = await fetch(`${API_URL}?action=login&phone=${savedPhone}&otp=AUTO`);
           const data = await res.json();
           
@@ -485,7 +524,6 @@
               
               setupUIApp();
           } else {
-              // Jika data sesi dalam sheet sudah tidak sah, padam localstorage
               localStorage.removeItem("harian_phone");
           }
       } catch (err) {
@@ -495,7 +533,6 @@
       }
   }
 
-  // Jalankan fungsi semakan auto-login setiap kali halaman selesai dimuatkan
   window.addEventListener("DOMContentLoaded", checkAutoLogin);
 </script>
 </body>
