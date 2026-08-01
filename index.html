@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadual & Carta Bintang Anak Hebat</title>
-	<link rel="icon" type="image/png" href="web-logo.png">
+    <link rel="icon" type="image/png" href="web-logo.png">
     <style>
         :root {
             --primary: #2b6cb0;
@@ -16,241 +16,66 @@
             --text: #2d3748;
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--background); color: var(--text); padding: 20px; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        /* Skrin Login */
+        .login-screen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .login-screen h2 { margin-bottom: 20px; color: var(--primary); }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 16px; }
+        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-login:hover { background: #2b6cb0; }
+        .error-msg { color: var(--danger); font-size: 14px; margin-top: 10px; display: none; }
 
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            padding: 20px;
-            line-height: 1.6;
-        }
+        /* Profil Anak */
+        .profile-bar { display: flex; justify-content: space-between; align-items: center; background: #edf2f7; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; }
+        .child-select { padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 5px; border: 1px solid #cbd5e0; background: white; }
+        .btn-logout { padding: 6px 12px; font-size: 12px; background: #718096; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        header {
-            text-align: center;
-            background: #4a5568;
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-        }
-
+        header { text-align: center; background: #4a5568; color: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         h1 { font-size: 24px; margin-bottom: 5px; }
         p.subtitle { color: #e2e8f0; font-size: 14px; }
 
-        /* Peraturan Rumah */
-        .rules-card {
-            background: #fffaf0;
-            border: 1px solid #feebc8;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-        }
+        .rules-card { background: #fffaf0; border: 1px solid #feebc8; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
         .rules-card h3 { color: #dd6b20; margin-bottom: 10px; font-size: 16px; }
-        .rules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 10px;
-            font-size: 14px;
-        }
+        .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; font-size: 14px; }
 
-        /* Ganjaran & Carta Bintang */
-        .reward-section {
-            background: #edf2f7;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .star-counter {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-        .star-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .star-slot {
-            width: 35px;
-            height: 35px;
-            border: 2px dashed #cbd5e0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #a0aec0;
-            background: white;
-            transition: all 0.3s ease;
-        }
-        .star-slot.earned {
-            border-style: solid;
-            border-color: #f6e05e;
-            background: #fefcbf;
-            color: #d69e2e;
-            font-size: 18px;
-            transform: scale(1.1);
-        }
+        .reward-section { background: #edf2f7; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; }
+        .star-counter { font-size: 20px; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        .star-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 15px; }
+        .star-slot { width: 35px; height: 35px; border: 2px dashed #cbd5e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #a0aec0; background: white; transition: all 0.3s ease; }
+        .star-slot.earned { border-style: solid; border-color: #f6e05e; background: #fefcbf; color: #d69e2e; font-size: 18px; transform: scale(1.1); }
 
-        /* Navigasi Hari */
-        .day-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 20px;
-        }
-        .day-btn {
-            flex: 1;
-            min-width: 80px;
-            padding: 10px;
-            border: none;
-            background: #e2e8f0;
-            color: var(--text);
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-        .day-btn.active {
-            background: var(--primary);
-            color: white;
-        }
+        .day-selector { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; }
+        .day-btn { flex: 1; min-width: 80px; padding: 10px; border: none; background: #e2e8f0; color: var(--text); font-weight: bold; border-radius: 5px; cursor: pointer; text-align: center; }
+        .day-btn.active { background: var(--primary); color: white; }
 
-        /* Jadual Tugasan */
-        .task-list {
-            margin-bottom: 25px;
-        }
-        .task-item {
-            display: flex;
-            align-items: center;
-            background: white;
-            border: 1px solid #e2e8f0;
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            transition: background 0.2s;
-        }
-        .task-item.completed {
-            background: #f0fff4;
-            border-color: #c6f6d5;
-        }
-        .task-time {
-            font-weight: bold;
-            color: var(--primary);
-            min-width: 130px;
-            font-size: 14px;
-        }
-        .task-details {
-            flex: 1;
-            padding-right: 15px;
-        }
+        .task-list { margin-bottom: 25px; }
+        .task-item { display: flex; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; }
+        .task-item.completed { background: #f0fff4; border-color: #c6f6d5; }
+        .task-time { font-weight: bold; color: var(--primary); min-width: 130px; font-size: 14px; }
+        .task-details { flex: 1; padding-right: 15px; }
         .task-title { font-weight: 600; font-size: 15px; }
-        .task-focus { 
-            font-size: 12px; 
-            color: #718096; 
-            font-style: italic;
-        }
-        .checkbox-container {
-            position: relative;
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
-        }
-        .checkbox-container input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
-        .checkmark {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 24px;
-            width: 24px;
-            background-color: #edf2f7;
-            border: 2px solid #cbd5e0;
-            border-radius: 4px;
-        }
-        .checkbox-container input:checked ~ .checkmark {
-            background-color: var(--success);
-            border-color: var(--success);
-        }
-        .checkmark:after {
-            content: "";
-            position: absolute;
-            display: none;
-        }
-        .checkbox-container input:checked ~ .checkmark:after {
-            display: block;
-        }
-        .checkbox-container .checkmark:after {
-            left: 7px;
-            top: 3px;
-            width: 6px;
-            height: 11px;
-            border: solid white;
-            border-width: 0 2.5px 2.5px 0;
-            transform: rotate(45deg);
-        }
+        .task-focus { font-size: 12px; color: #718096; font-style: italic; }
+        
+        .checkbox-container { position: relative; cursor: pointer; width: 24px; height: 24px; }
+        .checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        .checkmark { position: absolute; top: 0; left: 0; height: 24px; width: 24px; background-color: #edf2f7; border: 2px solid #cbd5e0; border-radius: 4px; }
+        .checkbox-container input:checked ~ .checkmark { background-color: var(--success); border-color: var(--success); }
+        .checkmark:after { content: ""; position: absolute; display: none; }
+        .checkbox-container input:checked ~ .checkmark:after { display: block; }
+        .checkbox-container .checkmark:after { left: 7px; top: 3px; width: 6px; height: 11px; border: solid white; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
 
-        /* Butang Kawalan */
-        .action-box {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+        .action-box { display: flex; gap: 10px; justify-content: center; }
+        .btn { padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-star { background: #ecc94b; color: #744210; }
-        .btn-star:hover { background: #d69e2e; }
         .btn-reset { background: #e53e3e; color: white; }
-        .btn-reset:hover { background: #c53030; }
 
-        /* Dialog Kejayaan */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            max-width: 400px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 400px; }
         .modal-content h2 { color: var(--success); margin-bottom: 10px; }
         
         @media (max-width: 600px) {
@@ -262,13 +87,38 @@
 </head>
 <body>
 
-<div class="container">
+<!-- BLOK 1: SKRIN LOGIN -->
+<div id="login-screen" class="login-screen">
+    <h2>Log Masuk Ibu Ayah</h2>
+    <div class="form-group">
+        <label>No. Telefon</label>
+        <input type="tel" id="login-phone" placeholder="Contoh: 0123456789">
+    </div>
+    <div class="form-group">
+        <label>Kod OTP Tetap</label>
+        <input type="password" id="login-otp" placeholder="Masukkan 4 digit OTP">
+    </div>
+    <button class="btn-login" onclick="handleLogin()">Masuk Sistem</button>
+    <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div>
+</div>
+
+<!-- BLOK 2: KANDUNGAN UTAMA APLIKASI (DIPAPARKAN SELEPAS LOGIN) -->
+<div id="main-app" class="container" style="display: none;">
+    
+    <!-- Bar Info Profil & Tukar Anak -->
+    <div class="profile-bar">
+        <div>
+            <label for="child-selector" style="font-weight: bold; margin-right: 5px;">Rutin Anak:</label>
+            <select id="child-selector" class="child-select" onchange="switchChild(this.value)"></select>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">Keluar Log</button>
+    </div>
+
     <header>
         <h1>RUTIN HARIAN ANAK HEBAT</h1>
         <p class="subtitle">Fokus Pembentukan Karakter, Emosi & Disiplin Diri</p>
     </header>
 
-    <!-- 5 Peraturan Rumah -->
     <div class="rules-card">
         <h3>⭐ 5 PERATURAN PENTING RUMAH KITA</h3>
         <div class="rules-grid">
@@ -280,14 +130,12 @@
         </div>
     </div>
 
-    <!-- Carta Bintang -->
     <div class="reward-section">
-        <div class="star-counter">Jumlah Bintang Dikumpul: <span id="star-count">0</span> / 20</div>
+        <div class="star-counter">Jumlah Bintang <span id="current-child-name">Anak</span>: <span id="star-count">0</span> / 20</div>
         <div class="star-grid" id="star-grid"></div>
         <p style="font-size: 13px; color: #4a5568;"><b>Ganjaran (Cukup 20 Bintang):</b> Pilihan Aktiviti Keluarga Istimewa! 🎉</p>
     </div>
 
-    <!-- Pilihan Hari -->
     <div class="day-selector">
         <button class="day-btn active" onclick="switchDay('Isnin')">Isnin</button>
         <button class="day-btn" onclick="switchDay('Selasa')">Selasa</button>
@@ -298,32 +146,28 @@
         <button class="day-btn" onclick="switchDay('Ahad')">Ahad</button>
     </div>
 
-    <!-- Tempat Jadual Keluar -->
     <div class="task-list" id="task-container"></div>
 
-    <!-- Butang Kawalan -->
     <div class="action-box">
         <button class="btn btn-star" onclick="addStarManual()">+ Beri 1 Bintang Khas ⭐</button>
-        <button class="btn btn-reset" onclick="resetApp()">Reset Semua</button>
+        <button class="btn btn-reset" onclick="resetApp()">Reset Skor Anak Ini</button>
     </div>
 </div>
 
-<!-- Modal Tahniah -->
 <div class="modal" id="reward-modal">
     <div class="modal-content">
         <h2>🎉 TAHNIAH! 🎉</h2>
-        <p>Hebatnya! Anda telah berjaya mengumpul 20 bintang!</p>
+        <p>Hebatnya! <span id="modal-child-name">Anak</span> telah berjaya mengumpul 20 bintang!</p>
         <p style="margin: 15px 0; font-weight: bold; color: #dd6b20;">Masa untuk Pilihan Aktiviti Keluarga Istimewa! 😍</p>
         <button class="btn" style="background: var(--primary); color: white;" onclick="closeModal()">Teruskan</button>
     </div>
 </div>
 
-<!-- Integrasi Firebase SDK & Logik Aplikasi -->
 <script>
-  // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
+  // ⚠️ MASUKKAN URL GOOGLE APPS SCRIPT WEB APP ANDA DI SINI[cite: 1]
   const API_URL = "https://script.google.com/macros/s/AKfycbzeqWVsOkq98nn8uM4rQAnyEqSrgdw9f7nRfFArwTw8K3tCM-SDRLZbd9pIeTXCA0gfZg/exec";
 
-  // Data Rutin Asas Harian (Dikekalkan seperti asal)
+  // Konfigurasi Rutin & Aktiviti (Dikekalkan seperti asal)[cite: 1]
   const baseRoutine = [
       { time: "06:30 AM", title: "Bangun, kemas tempat tidur, gosok gigi, mandi", focus: "Disiplin & Berdikari" },
       { time: "07:00 AM", title: "Sarapan bersama keluarga", focus: "Komunikasi & Adab Makan" },
@@ -337,51 +181,118 @@
       { time: "05:30 PM - 06:30 PM", title: "Aktiviti keluarga / membantu rumah", focus: "Tanggungjawab" },
       { time: "06:30 PM - 08:00 PM", title: "Makan malam, keluarga, mandi", focus: "Komunikasi" },
       { time: "08:00 PM - 08:30 PM", title: "Cerita, membaca buku, berbual", focus: "Bahasa & Emosi" },
-      { time: "08:30 PM - 09:00 PM", title: "Berseda tidur", focus: "Disiplin" }
+      { time: "08:30 PM - 09:00 PM", title: "Bersedia tidur", focus: "Disiplin" }
   ];
 
   const specialActivities = {
-      Isnin: { title: "Hari Disiplin: Susun kasut sendiri, simpan beg, lipat baju kecil, kemas mainan. Latihan: 'Barang kita, kita jaga.'", focus: "Disiplin & Tanggungjawab" },
-      Selasa: { title: "Hari Komunikasi: Bercerita hari sekolah ('Apa perkara baik hari ini?', 'Ada bantu kawan?', 'Apa yang buat sedih?'). Latihan: Pandang mata, tunggu orang habis bercakap.", focus: "Komunikasi" },
-      Rabu: { title: "Hari Kawalan Emosi: Belajar kenal emosi. Boleh buat: Tarik nafas, duduk sekejap, cakap 'Saya tidak suka'. Elakkan: Menjerit, pukul, campak barang.", focus: "Mengurus Emosi" },
-      Khamis: { title: "Hari Keyakinan Diri: Bercakap depan ibu ayah 2-3 minit (nyanyi / cerita buku / tunjuk lukisan). Tujuan: Berani & yakin diri.", focus: "Keyakinan Diri" },
-      Jumaat: { title: "Hari Nilai & Empati: Bantu ibu ayah, beri makanan kepada adik/kakak, ucap terima kasih & minta maaf. Slogan: 'Orang berjaya mesti orang baik.'", focus: "Empati & Tanggungjawab kecil" },
-      Sabtu: { title: "Hari Sosial & Projek: [Pagi] Taman permainan/berbasikal (Berkongsi, ikut peraturan). [Petang] Bina lego/puzzle/memasak (Fokus & sabar). [Malam] Family discussion.", focus: "Sabar menunggu giliran & Berkongsi" },
-      Ahad: { title: "Hari Keluarga & Persediaan: [Pagi] Kemas bilik & barang sekolah. [Petang] Ziarah/Kedai (Adab awam: beri salam, terima kasih, tunggu giliran, cakap perlahan). [Malam] Siap beg & baju.", focus: "Menyelesaikan masalah sendiri & Adab" }
+      Isnin: { title: "Hari Disiplin: Susun kasut sendiri, simpan beg, lipat baju kecil, kemas mainan.", focus: "Disiplin & Tanggungjawab" },
+      Selasa: { title: "Hari Komunikasi: Bercerita hari sekolah. Latihan: Pandang mata, tunggu orang habis bercakap.", focus: "Komunikasi" },
+      Rabu: { title: "Hari Kawalan Emosi: Belajar kenal emosi. Boleh buat: Tarik nafas, duduk sekejap.", focus: "Mengurus Emosi" },
+      Khamis: { title: "Hari Keyakinan Diri: Bercakap depan ibu ayah 2-3 minit (nyanyi / cerita buku).", focus: "Keyakinan Diri" },
+      Jumaat: { title: "Hari Nilai & Empati: Bantu ibu ayah, beri makanan kepada adik/kakak, ucap terima kasih.", focus: "Empati" },
+      Sabtu: { title: "Hari Sosial & Projek: [Pagi] Taman permainan/berbasikal. [Petang] Bina lego/puzzle.", focus: "Sabar & Berkongsi" },
+      Ahad: { title: "Hari Keluarga & Persediaan: [Pagi] Kemas bilik & barang sekolah. [Petang] Ziarah/Kedai.", focus: "Adab Awam" }
   };
 
+  // State Pengurusan Sesi Login & Profil
+  let userSession = { phone: "", children: [], activeChild: "" };
   let currentDay = "Isnin";
   let appState = { stars: 0, completedTasks: {} };
 
-  // AMBIL DATA DARI GOOGLE SHEETS
-  async function loadDataFromSheets() {
+  // --- LOGIK PENGURUSAN LOGIN ---
+  async function handleLogin() {
+      const phone = document.getElementById("login-phone").value.trim();
+      const otp = document.getElementById("login-otp").value.trim();
+      const errorDiv = document.getElementById("login-error");
+      
+      if(!phone || !otp) return alert("Sila isi semua ruangan!");
+
       try {
-          const response = await fetch(API_URL);
-          const data = await response.json();
+          const res = await fetch(`${API_URL}?action=login&phone=${phone}&otp=${otp}`);
+          const data = await res.json();
+          
+          if (data.status === "success") {
+              userSession.phone = phone;
+              userSession.children = data.children;
+              userSession.activeChild = data.activeChild || data.children[0];
+              
+              // Simpan sesi ringkas dalam LocalStorage
+              localStorage.setItem("harian_phone", phone);
+              
+              setupUIApp();
+          } else {
+              errorDiv.style.display = "block";
+              errorDiv.innerText = data.message;
+          }
+      } catch (err) {
+          alert("Gagal menghubungi server. Sila semak Apps Script anda.");
+      }
+  }
+
+  function setupUIApp() {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("main-app").style.display = "block";
+      
+      // Bina Dropdown Senarai Anak
+      const selector = document.getElementById("child-selector");
+      selector.innerHTML = "";
+      userSession.children.forEach(name => {
+          let opt = document.createElement("option");
+          opt.value = name;
+          opt.innerText = name;
+          if(name === userSession.activeChild) opt.selected = true;
+          selector.appendChild(opt);
+      });
+
+      loadChildData();
+  }
+
+  function handleLogout() {
+      localStorage.removeItem("harian_phone");
+      location.reload();
+  }
+
+  // --- LOGIK SEMAK & MINTA DATA ANAK ---
+  async function loadChildData() {
+      document.getElementById("current-child-name").innerText = userSession.activeChild;
+      try {
+          const res = await fetch(`${API_URL}?action=getData&phone=${userSession.phone}&child=${userSession.activeChild}`);
+          const data = await res.json();
           appState.stars = data.stars || 0;
           appState.completedTasks = data.completedTasks || {};
           renderStars();
           renderTasks();
-      } catch (error) {
-          console.error("Gagal memuatkan data dari Google Sheets:", error);
+      } catch (err) {
+          console.error("Gagal mendapatkan data skor anak.", err);
       }
   }
 
-  // SIMPAN DATA KE GOOGLE SHEETS
-  async function saveToSheets() {
-      try {
-          renderStars(); // Update visual paparan serta-merta
-          await fetch(API_URL, {
-              method: 'POST',
-              mode: 'no-cors', // Mencegah isu sekatan CORS pelayar web
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(appState)
-          });
-      } catch (error) {
-          console.error("Gagal menyimpan data ke Google Sheets:", error);
-      }
+  async function switchChild(childName) {
+      userSession.activeChild = childName;
+      await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({ action: "changeActiveChild", phone: userSession.phone, child: childName })
+      });
+      loadChildData();
   }
 
+  async function saveProgress() {
+      renderStars();
+      await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+              action: "saveData",
+              phone: userSession.phone,
+              child: userSession.activeChild,
+              stars: appState.stars,
+              completedTasks: appState.completedTasks
+          })
+      });
+  }
+
+  // --- LOGIK RENDER & SKOR (Dikekalkan/Disesuaikan sedikit) ---
   function renderStars() {
       const grid = document.getElementById('star-grid');
       grid.innerHTML = '';
@@ -394,6 +305,7 @@
       document.getElementById('star-count').innerText = appState.stars;
       
       if (appState.stars >= 20) {
+          document.getElementById('modal-child-name').innerText = userSession.activeChild;
           document.getElementById('reward-modal').style.display = 'flex';
       }
   }
@@ -405,7 +317,6 @@
       baseRoutine.forEach((item, index) => {
           let title = item.title;
           let focus = item.focus;
-
           if (item.isSpecial) {
               title = specialActivities[currentDay].title;
               focus = specialActivities[currentDay].focus;
@@ -413,7 +324,6 @@
 
           const taskId = `${currentDay}-${index}`;
           const isChecked = appState.completedTasks[taskId] || false;
-
           const taskItem = document.createElement('div');
           taskItem.className = `task-item ${isChecked ? 'completed' : ''}`;
 
@@ -432,22 +342,19 @@
           taskItem.querySelector('input').addEventListener('change', (e) => {
               toggleTask(e.target.dataset.taskid, e.target);
           });
-
           container.appendChild(taskItem);
       });
   }
 
   function toggleTask(taskId, checkbox) {
       appState.completedTasks[taskId] = checkbox.checked;
-      
       if (checkbox.checked) {
           if (appState.stars < 20) appState.stars++;
       } else {
           if (appState.stars > 0) appState.stars--;
       }
-
       checkbox.closest('.task-item').classList.toggle('completed', checkbox.checked);
-      saveToSheets();
+      saveProgress();
   }
 
   window.switchDay = function(day) {
@@ -461,26 +368,25 @@
   window.addStarManual = function() {
       if (appState.stars < 20) {
           appState.stars++;
-          saveToSheets();
+          saveProgress();
       }
   }
 
   window.resetApp = async function() {
-      if (confirm("Adakah anda pasti mahu memulakan semula carta dan memadam semua data di Google Sheets?")) {
+      if (confirm(`Adakah anda pasti mahu set semula rekod bagi ${userSession.activeChild}?`)) {
           appState = { stars: 0, completedTasks: {} };
-          await saveToSheets();
-          // Memandangkan post menggunakan 'no-cors', berikan jeda pendek sebelum refresh paparan
-          setTimeout(() => { window.switchDay('Isnin'); }, 500);
+          await saveProgress();
+          setTimeout(() => { window.switchDay('Isnin'); }, 300);
       }
   }
 
-  window.closeModal = function() {
-      document.getElementById('reward-modal').style.display = 'none';
+  window.closeModal = function() { document.getElementById('reward-modal').style.display = 'none'; }
+
+  // Semak Autologin jika ada sesi tersimpan lama
+  const savedPhone = localStorage.getItem("harian_phone");
+  if (savedPhone) {
+      document.getElementById("login-phone").value = savedPhone;
   }
-
-  // Muat data automatik semasa aplikasi dibuka
-  loadDataFromSheets();
 </script>
-
 </body>
 </html>
