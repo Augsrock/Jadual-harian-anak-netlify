@@ -334,6 +334,7 @@
   }
 
   async function saveProgress() {
+	showLoading(true);
       renderStars();
       // Proses simpanan latar belakang tanpa mengganggu penggunaan (tidak menggunakan showLoading untuk kelancaran)
       try {
@@ -350,6 +351,7 @@
           });
       } catch(err) {
           console.error("Gagal menyimpan kemajuan ke server.", err);
+		  showLoading(false);
       }
   }
 
