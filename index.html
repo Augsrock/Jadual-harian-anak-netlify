@@ -365,6 +365,7 @@
 
   async function saveProgress() {
       renderStars();
+	  showLoading(true);
       try {
           await fetch(API_URL, {
               method: 'POST',
@@ -373,13 +374,14 @@
                   action: "saveData",
                   phone: userSession.phone,
                   child: userSession.activeChild,
-                  // Hantar keseluruhan objek bintang (semua hari)
                   stars: typeof appState.stars === 'object' ? JSON.stringify(appState.stars) : appState.stars,
                   completedTasks: appState.completedTasks
               })
           });
       } catch(err) {
           console.error("Gagal menyimpan kemajuan ke server.", err);
+      } finally {
+          showLoading(false);
       }
   }
 
@@ -456,8 +458,8 @@
           container.appendChild(taskItem);
       });
   }
-
-  function toggleTask(taskId, checkbox) {
+  
+  async function toggleTask(taskId, checkbox) {
       appState.completedTasks[taskId] = checkbox.checked;
       let currentStars = getCurrentDayStars();
 
@@ -469,7 +471,8 @@
       
       setCurrentDayStars(currentStars);
       checkbox.closest('.task-item').classList.toggle('completed', checkbox.checked);
-      saveProgress();
+      
+      await saveProgress();
   }
 
   window.switchDay = function(day) {
@@ -477,13 +480,13 @@
       renderStars(); // Render bintang mengikut data hari baru
       renderTasks();
   }
-
-  window.addStarManual = function() {
+  
+  window.addStarManual = async function() {
       let currentStars = getCurrentDayStars();
       if (currentStars < 20) {
           currentStars++;
           setCurrentDayStars(currentStars);
-          saveProgress();
+          await saveProgress();
       }
   }
 
