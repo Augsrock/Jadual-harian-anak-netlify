@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadual & Carta Bintang Anak Hebat</title>
+    <title>Jadual & Carta Bintang Anak</title>
     <link rel="icon" type="image/png" href="web-logo.png">
     <style>
         :root {
@@ -17,8 +17,8 @@
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--background); color: var(--text); padding: 20px; line-height: 1.6; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        body { background-color: var(--background); color: var(--text); padding: 20px; line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; }
         
         /* Skrin Login */
         .login-screen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
@@ -110,6 +110,25 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* PERUBAHAN: GAYA REKAAN FOOTER DI SINI */
+        footer.site-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 13px;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+        }
+        footer.site-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        footer.site-footer a:hover {
+            text-decoration: underline;
+        }
         
         @media (max-width: 600px) {
             .task-item { flex-direction: column; align-items: flex-start; }
@@ -154,7 +173,7 @@
     </div>
 
     <header>
-        <h1>RUTIN HARIAN ANAK HEBAT</h1>
+        <h1>RUTIN HARIAN ANAK</h1>
         <p class="subtitle">Fokus Pembentukan Karakter, Emosi & Disiplin Diri</p>
     </header>
 
@@ -201,6 +220,12 @@
         <button class="btn" style="background: var(--primary); color: white;" onclick="closeModal()">Teruskan</button>
     </div>
 </div>
+
+<!-- PERUBAHAN: BLOK SEKSYEN FOOTER DI BAWAH Halaman -->
+<footer class="site-footer">
+    <p>&copy; 2026 <strong>Jadual Harian Anak</strong>. Hak Cipta Terpelihara.</p>
+    <p>Dibangunkan khas oleh <a href="https://github.com/Augsrock/Jadual-harian-anak-netlify">augsrock</a> since 2026</p>
+</footer>
 
 <script>
   const API_URL = "/.netlify/functions/api";
@@ -256,14 +281,12 @@
   const daysMapping = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
   let currentDay = daysMapping[new Date().getDay()];
   
-  // appState.stars sekarang diubah kepada struktur Objek berasingan mengikut hari
   let appState = { stars: {}, completedTasks: {} };
 
   function showLoading(show) {
       document.getElementById("loading-overlay").style.display = show ? "flex" : "none";
   }
 
-  // Ambil jumlah bintang khusus untuk hari yang sedang aktif (Lalai: 0)
   function getCurrentDayStars() {
       if (typeof appState.stars === 'object' && appState.stars !== null) {
           return appState.stars[currentDay] || 0;
@@ -271,7 +294,6 @@
       return 0;
   }
 
-  // Set jumlah bintang khusus untuk hari yang sedang aktif
   function setCurrentDayStars(value) {
       if (typeof appState.stars !== 'object' || appState.stars === null) {
           appState.stars = {};
@@ -339,7 +361,6 @@
           const res = await fetch(`${API_URL}?action=getData&phone=${userSession.phone}&child=${userSession.activeChild}`);
           const data = await res.json();
           
-          // Memastikan data appState.stars diuruskan sebagai Objek
           if (data.stars && typeof data.stars === 'string') {
               try {
                   appState.stars = JSON.parse(data.stars);
@@ -349,7 +370,6 @@
           } else if (data.stars && typeof data.stars === 'object') {
               appState.stars = data.stars;
           } else {
-              // Jika ia adalah nombor tunggal (data lama di DB), tukarkannya menjadi format hari semasa sebagai fallback
               appState.stars = {};
               if (typeof data.stars === 'number') {
                   appState.stars[currentDay] = data.stars;
@@ -498,7 +518,7 @@
 
   window.switchDay = function(day) {
       currentDay = day;
-      renderStars(); // Render bintang mengikut data hari baru
+      renderStars();
       renderTasks();
   }
   
@@ -513,10 +533,8 @@
 
   window.resetApp = async function() {
       if (confirm(`Adakah anda pasti mahu set semula rekod bintang & tugasan bagi ${userSession.activeChild} pada hari ${currentDay}?`)) {
-          // Hanya set semula bintang hari terpilih sahaja
           setCurrentDayStars(0);
           
-          // Padam penandaan tugasan (completed tasks) bagi hari terpilih sahaja
           for (let key in appState.completedTasks) {
               if (key.startsWith(`${currentDay}-`)) {
                   appState.completedTasks[key] = false;
