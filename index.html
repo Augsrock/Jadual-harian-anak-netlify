@@ -452,10 +452,39 @@
 
   window.closeModal = function() { document.getElementById('reward-modal').style.display = 'none'; }
 
-  const savedPhone = localStorage.getItem("harian_phone");
-  if (savedPhone) {
-      document.getElementById("login-phone").value = savedPhone;
+  // --- LOGIK AUTO LOGIN APABILA REFRESH PAGE ---
+  async function checkAutoLogin() {
+      const savedPhone = localStorage.getItem("harian_phone");
+      
+      // Jika tiada data telefon disimpan, kekal di skrin login
+      if (!savedPhone) return;
+
+      showLoading(true);
+      try {
+          // Kita hantar request ke API untuk dapatkan semula senarai anak & anak aktif
+          // Menggunakan 'autologin' sebagai flag supaya tidak perlu memasukkan OTP semula
+          const res = await fetch(`${API_URL}?action=login&phone=${savedPhone}&otp=AUTO`);
+          const data = await res.json();
+          
+          if (data.status === "success") {
+              userSession.phone = savedPhone;
+              userSession.children = data.children;
+              userSession.activeChild = data.activeChild || data.children[0];
+              
+              setupUIApp();
+          } else {
+              // Jika data sesi dalam sheet sudah tidak sah, padam localstorage
+              localStorage.removeItem("harian_phone");
+          }
+      } catch (err) {
+          console.error("Gagal melakukan auto-login semasa refresh:", err);
+      } finally {
+          showLoading(false);
+      }
   }
+
+  // Jalankan fungsi semakan auto-login setiap kali halaman selesai dimuatkan
+  window.addEventListener("DOMContentLoaded", checkAutoLogin);
 </script>
 </body>
 </html>
