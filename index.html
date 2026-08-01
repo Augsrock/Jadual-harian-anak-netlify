@@ -134,10 +134,10 @@
         <input type="tel" id="login-phone" placeholder="Contoh: 0123456789">
     </div>
     <div class="form-group">
-        <label>Kod OTP Tetap</label>
+        <label>Kod OTP</label>
         <input type="password" id="login-otp" placeholder="Masukkan 4 digit OTP">
     </div>
-    <button class="btn-login" onclick="handleLogin()">Masuk Sistem</button>
+    <button class="btn-login" onclick="handleLogin()">Log Masuk</button>
     <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div>
 </div>
 
@@ -150,7 +150,7 @@
             <label for="child-selector" style="font-weight: bold; margin-right: 5px;">Rutin Anak:</label>
             <select id="child-selector" class="child-select" onchange="switchChild(this.value)"></select>
         </div>
-        <button class="btn-logout" onclick="handleLogout()">Keluar Log</button>
+        <button class="btn-logout" onclick="handleLogout()">Log Keluar</button>
     </div>
 
     <header>
@@ -234,7 +234,8 @@
   };
 
   let userSession = { phone: "", children: [], activeChild: "" };
-  let currentDay = "Isnin";
+  const daysMapping = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
+  let currentDay = daysMapping[new Date().getDay()];
   let appState = { stars: 0, completedTasks: {} };
 
   // Fungsi utiliti kawalan loading spinner
@@ -374,8 +375,12 @@
   }
 
   function renderTasks() {
-      const container = document.getElementById('task-container');
-      container.innerHTML = '';
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText === currentDay);
+    });
+
+    const container = document.getElementById('task-container');
+    container.innerHTML = '';
 
       baseRoutine.forEach((item, index) => {
           let title = item.title;
