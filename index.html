@@ -188,7 +188,7 @@
     <div class="task-list" id="task-container"></div>
 
     <div class="action-box">
-        <button class="btn btn-star" onclick="addStarManual()">+ Beri 1 Bintang Khas ⭐</button>
+		<button id="btn-add-star" class="btn btn-star" onclick="addStarManual()">+ Beri 1 Bintang Khas ⭐</button>
         <button class="btn btn-reset" onclick="resetApp()">Reset Skor Anak Ini</button>
     </div>
 </div>
@@ -365,6 +365,20 @@
           grid.appendChild(slot);
       }
       document.getElementById('star-count').innerText = appState.stars;
+      
+      // --- LOGIK BARU UNTUK DISABLE BUTANG APABILA MENCECAH HAD 20 ---
+      const addStarBtn = document.getElementById('btn-add-star');
+      if (addStarBtn) {
+          if (appState.stars >= 20) {
+              addStarBtn.disabled = true;
+              addStarBtn.style.opacity = "0.5";       // Jadikan butang sedikit kabur
+              addStarBtn.style.cursor = "not-allowed"; // Tukar ikon tetikus kepada ikon 'dilarang'
+          } else {
+              addStarBtn.disabled = false;
+              addStarBtn.style.opacity = "1";
+              addStarBtn.style.cursor = "pointer";
+          }
+      }
       
       if (appState.stars >= 20) {
           document.getElementById('modal-child-name').innerText = userSession.activeChild;
