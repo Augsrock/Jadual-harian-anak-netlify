@@ -27,13 +27,14 @@
         .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
         .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 16px; }
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .btn-login:hover { background: #2b6cb0; }
+        .btn-login:hover { background: #235284; }
         .error-msg { color: var(--danger); font-size: 14px; margin-top: 10px; display: none; }
 
         /* Profil Anak */
         .profile-bar { display: flex; justify-content: space-between; align-items: center; background: #edf2f7; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; }
-        .child-select { padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 5px; border: 1px solid #cbd5e0; background: white; }
+        .child-select { padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 5px; border: 1px solid #cbd5e0; background: white; cursor: pointer; }
         .btn-logout { padding: 6px 12px; font-size: 12px; background: #718096; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-logout:hover { background: #4a5568; }
 
         header { text-align: center; background: #4a5568; color: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         h1 { font-size: 24px; margin-bottom: 5px; }
@@ -72,11 +73,43 @@
         .action-box { display: flex; gap: 10px; justify-content: center; }
         .btn { padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-star { background: #ecc94b; color: #744210; }
+        .btn-star:hover { background: #d69e2e; }
         .btn-reset { background: #e53e3e; color: white; }
+        .btn-reset:hover { background: #c53030; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
         .modal-content { background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 400px; }
         .modal-content h2 { color: var(--success); margin-bottom: 10px; }
+
+        /* SPINNER LOADING OVERLAY (ELEM BARU) */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            margin-top: 15px;
+            font-weight: bold;
+            color: var(--text);
+            font-size: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
         @media (max-width: 600px) {
             .task-item { flex-direction: column; align-items: flex-start; }
@@ -86,6 +119,12 @@
     </style>
 </head>
 <body>
+
+<!-- COMPONENT BARU: LOADING OVERLAY -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Sedang memproses, sila tunggu...</div>
+</div>
 
 <!-- BLOK 1: SKRIN LOGIN -->
 <div id="login-screen" class="login-screen">
@@ -102,7 +141,7 @@
     <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div>
 </div>
 
-<!-- BLOK 2: KANDUNGAN UTAMA APLIKASI (DIPAPARKAN SELEPAS LOGIN) -->
+<!-- BLOK 2: KANDUNGAN UTAMA APLIKASI -->
 <div id="main-app" class="container" style="display: none;">
     
     <!-- Bar Info Profil & Tukar Anak -->
@@ -164,9 +203,10 @@
 </div>
 
 <script>
+  // Selamat kerana dihalang oleh Netlify Function proxy rahsia
   const API_URL = "/.netlify/functions/api";
 
-  // Konfigurasi Rutin & Aktiviti (Dikekalkan seperti asal)[cite: 1]
+  // Konfigurasi Rutin & Aktiviti[cite: 1]
   const baseRoutine = [
       { time: "06:30 AM", title: "Bangun, kemas tempat tidur, gosok gigi, mandi", focus: "Disiplin & Berdikari" },
       { time: "07:00 AM", title: "Sarapan bersama keluarga", focus: "Komunikasi & Adab Makan" },
@@ -193,10 +233,14 @@
       Ahad: { title: "Hari Keluarga & Persediaan: [Pagi] Kemas bilik & barang sekolah. [Petang] Ziarah/Kedai.", focus: "Adab Awam" }
   };
 
-  // State Pengurusan Sesi Login & Profil
   let userSession = { phone: "", children: [], activeChild: "" };
   let currentDay = "Isnin";
   let appState = { stars: 0, completedTasks: {} };
+
+  // Fungsi utiliti kawalan loading spinner
+  function showLoading(show) {
+      document.getElementById("loading-overlay").style.display = show ? "flex" : "none";
+  }
 
   // --- LOGIK PENGURUSAN LOGIN ---
   async function handleLogin() {
@@ -206,6 +250,7 @@
       
       if(!phone || !otp) return alert("Sila isi semua ruangan!");
 
+      showLoading(true);
       try {
           const res = await fetch(`${API_URL}?action=login&phone=${phone}&otp=${otp}`);
           const data = await res.json();
@@ -215,16 +260,16 @@
               userSession.children = data.children;
               userSession.activeChild = data.activeChild || data.children[0];
               
-              // Simpan sesi ringkas dalam LocalStorage
               localStorage.setItem("harian_phone", phone);
-              
               setupUIApp();
           } else {
               errorDiv.style.display = "block";
               errorDiv.innerText = data.message;
           }
       } catch (err) {
-          alert("Gagal menghubungi server. Sila semak Apps Script anda.");
+          alert("Gagal menghubungi API rahsia Netlify. Pastikan Environment Variable dikemaskini.");
+      } finally {
+          showLoading(false);
       }
   }
 
@@ -232,7 +277,6 @@
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("main-app").style.display = "block";
       
-      // Bina Dropdown Senarai Anak
       const selector = document.getElementById("child-selector");
       selector.innerHTML = "";
       userSession.children.forEach(name => {
@@ -251,9 +295,12 @@
       location.reload();
   }
 
-  // --- LOGIK SEMAK & MINTA DATA ANAK ---
+  // --- LOGIK AMBIL & SIMPAN DATA PERIBADI ---
   async function loadChildData() {
+      // Optimistic Update: Tukar nama di paparan dengan cepat
       document.getElementById("current-child-name").innerText = userSession.activeChild;
+      
+      showLoading(true);
       try {
           const res = await fetch(`${API_URL}?action=getData&phone=${userSession.phone}&child=${userSession.activeChild}`);
           const data = await res.json();
@@ -263,35 +310,50 @@
           renderTasks();
       } catch (err) {
           console.error("Gagal mendapatkan data skor anak.", err);
+      } finally {
+          showLoading(false);
       }
   }
 
   async function switchChild(childName) {
       userSession.activeChild = childName;
-      await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({ action: "changeActiveChild", phone: userSession.phone, child: childName })
-      });
-      loadChildData();
+      document.getElementById("current-child-name").innerText = childName; // visual dikemaskini awal
+      
+      showLoading(true);
+      try {
+          await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: "changeActiveChild", phone: userSession.phone, child: childName })
+          });
+          await loadChildData();
+      } catch(err) {
+          console.error("Gagal menukar status anak aktif di server.", err);
+          showLoading(false);
+      }
   }
 
   async function saveProgress() {
       renderStars();
-      await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: JSON.stringify({
-              action: "saveData",
-              phone: userSession.phone,
-              child: userSession.activeChild,
-              stars: appState.stars,
-              completedTasks: appState.completedTasks
-          })
-      });
+      // Proses simpanan latar belakang tanpa mengganggu penggunaan (tidak menggunakan showLoading untuk kelancaran)
+      try {
+          await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  action: "saveData",
+                  phone: userSession.phone,
+                  child: userSession.activeChild,
+                  stars: appState.stars,
+                  completedTasks: appState.completedTasks
+              })
+          });
+      } catch(err) {
+          console.error("Gagal menyimpan kemajuan ke server.", err);
+      }
   }
 
-  // --- LOGIK RENDER & SKOR (Dikekalkan/Disesuaikan sedikit) ---
+  // --- LOGIK RENDER & SKOR ---
   function renderStars() {
       const grid = document.getElementById('star-grid');
       grid.innerHTML = '';
@@ -374,14 +436,15 @@
   window.resetApp = async function() {
       if (confirm(`Adakah anda pasti mahu set semula rekod bagi ${userSession.activeChild}?`)) {
           appState = { stars: 0, completedTasks: {} };
+          showLoading(true);
           await saveProgress();
-          setTimeout(() => { window.switchDay('Isnin'); }, 300);
+          window.switchDay('Isnin');
+          showLoading(false);
       }
   }
 
   window.closeModal = function() { document.getElementById('reward-modal').style.display = 'none'; }
 
-  // Semak Autologin jika ada sesi tersimpan lama
   const savedPhone = localStorage.getItem("harian_phone");
   if (savedPhone) {
       document.getElementById("login-phone").value = savedPhone;
