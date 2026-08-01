@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Dashboard - Pemantauan Prestasi Anak</title>
+    <link type="image/png" rel="icon" href="../web-logo.png">
+    <!-- Chart.js CDN untuk grafik kemajuan -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --primary-light: #ebf8ff;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #e53e3e;
+            --background: #f7fafc;
+            --text: #2d3748;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--background); color: var(--text); padding: 20px; line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; }
+        
+        /* Skrin Login Disamakan */
+        .login-screen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .login-screen h2 { margin-bottom: 20px; color: var(--primary); }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 16px; }
+        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-login:hover { background: #235284; }
+        .error-msg { color: var(--danger); font-size: 14px; margin-top: 10px; display: none; }
+
+        /* Pautan kecil ke Dashboard / Halaman Utama bawah login */
+        .login-nav-link { text-align: right; margin-top: 15px; }
+        .login-nav-link a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 13px; }
+        .login-nav-link a:hover { text-decoration: underline; }
+
+        /* Dashboard UI */
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; background: #edf2f7; padding: 12px 20px; border-radius: 8px; margin-bottom: 25px; }
+        .user-info { font-weight: bold; color: var(--primary); }
+        .btn-logout { padding: 6px 12px; font-size: 12px; background: #718096; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-logout:hover { background: #4a5568; }
+
+        header { text-align: center; background: #2d3748; color: white; padding: 25px; border-radius: 8px; margin-bottom: 25px; }
+        h1 { font-size: 24px; margin-bottom: 5px; }
+        p.subtitle { color: #e2e8f0; font-size: 14px; }
+
+        /* Grid Statistik */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--primary-light); border-left: 5px solid var(--primary); padding: 15px; border-radius: 8px; }
+        .stat-card.success { background: #f0fff4; border-left-color: var(--success); }
+        .stat-card-title { font-size: 13px; text-transform: uppercase; color: #718096; font-weight: bold; }
+        .stat-card-val { font-size: 22px; font-weight: bold; margin-top: 5px; }
+
+        /* Bahagian Grafik/Carta */
+        .chart-section { background: #fff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 30px; position: relative; height: 350px; }
+
+        /* Senarai Ringkasan Anak */
+        .child-summary-title { margin-bottom: 15px; font-size: 18px; color: var(--text); border-bottom: 2px solid #edf2f7; padding-bottom: 5px; }
+        .child-row { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .child-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 5px; }
+        .child-name { color: var(--primary); font-size: 16px; }
+        .day-badge-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .day-badge { background: #edf2f7; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 500; }
+        .day-badge.complete { background: #c6f6d5; color: #22543d; font-weight: bold; }
+
+        /* Pautan Balik */
+        .action-footer { display: flex; justify-content: center; margin-top: 20px; }
+        .btn-link { background: var(--success); color: white; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .btn-link:hover { background: #38a169; }
+
+        /* SPINNER LOADING OVERLAY */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8); z-index: 999;
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { margin-top: 15px; font-weight: bold; color: var(--text); font-size: 15px; }
+
+        footer.site-footer { margin-top: auto; text-align: center; padding: 20px 0; font-size: 13px; color: #718096; border-top: 1px solid #e2e8f0; width: 100%; }
+        footer.site-footer a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        footer.site-footer a:hover { text-decoration: underline; }
+	</style>
+</head>
+<body>
+
+<div id="loading-overlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Menyusun statistik maklumat, sila tunggu...</div>
+</div>
+
+<!-- SKRIN LOGIN -->
+<div id="login-screen" class="login-screen">
+    <h2>Log Masuk Dashboard</h2>
+    <p style="font-size: 13px; color: #718096; margin-bottom: 15px;">Gunakan no. telefon dan OTP yang sama untuk mengakses data anak anda.</p>
+    <div class="form-group">
+        <label>No. Telefon</label>
+        <input type="tel" id="login-phone" placeholder="Contoh: 0123456789">
+    </div>
+    <div class="form-group">
+        <label>Kod OTP</label>
+        <input type="tel" id="login-otp" placeholder="Masukkan 4 digit OTP">
+    </div>
+    <button class="btn-login" onclick="handleLogin()">Log Masuk Dashboard</button>
+    <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div>
+
+    <div class="login-nav-link">
+        <a href="../">← Balik Ke Rutin Anak</a>
+    </div>
+</div>
+
+<!-- KANDUNGAN UTAMA DASHBOARD -->
+<div id="main-app" class="container" style="display: none;">
+    <div class="nav-bar">
+        <div class="user-info">Akaun Penjaga: <span id="txt-user-phone">-</span></div>
+        <button class="btn-logout" onclick="handleLogout()">Log Keluar</button>
+    </div>
+
+    <header>
+        <h1>PORTAL PEMANTAUAN PRESTASI RUMAH</h1>
+        <p class="subtitle">Analisis Data Rutin Harian & Pengumpulan Bintang Mingguan</p>
+    </header>
+
+    <!-- Papan Statistik Ringkas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card-title">Jumlah Anak Dipantau</div>
+            <div class="stat-card-val" id="stat-total-children">0 orang</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-card-title">Sasaran Ganjaran Penuh (20⭐)</div>
+            <div class="stat-card-val" id="stat-target-reached">0 Hari</div>
+        </div>
+    </div>
+
+    <!-- Paparan Analisis Grafik Visual -->
+    <h3 class="child-summary-title">📈 Carta Prestasi Bintang Mengikut Hari</h3>
+    <div class="chart-section">
+        <canvas id="weeklyChart"></canvas>
+    </div>
+
+    <!-- Ringkasan Mengikut Anak -->
+    <h3 class="child-summary-title">👦 Profil & Kemajuan Harian</h3>
+    <div id="child-summary-container"></div>
+
+    <div class="action-footer">
+        <a href="../" class="btn-link">← Kembali ke Jadual Rutin Anak</a>
+    </div>
+</div>
+
+<footer class="site-footer">
+    <p>&copy; 2026 <strong>Jadual Harian Anak</strong>. Hak Cipta Terpelihara.</p>
+    <p>Dibangunkan khas oleh <a href="https://github.com/Augsrock/Jadual-harian-anak-netlify">augsrock</a></p>
+</footer>
+
+<script>
+  const API_URL = "/.netlify/functions/api";
+  const daysOrder = ["Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu", "Ahad"];
+  
+  let userSession = { phone: "", children: [] };
+  let allChildrenData = {}; 
+  let chartInstance = null;
+
+  function showLoading(show) {
+      document.getElementById("loading-overlay").style.display = show ? "flex" : "none";
+  }
+
+  async function handleLogin() {
+      const phone = document.getElementById("login-phone").value.trim();
+      const otp = document.getElementById("login-otp").value.trim();
+      const errorDiv = document.getElementById("login-error");
+      
+      if(!phone || !otp) return alert("Sila isi semua ruangan!");
+
+      showLoading(true);
+      try {
+          const res = await fetch(`${API_URL}?action=login&phone=${phone}&otp=${otp}`);
+          const data = await res.json();
+          
+          if (data.status === "success") {
+              userSession.phone = phone;
+              userSession.children = data.children;
+              localStorage.setItem("harian_phone", phone);
+              setupDashboard();
+          } else {
+              errorDiv.style.display = "block";
+              errorDiv.innerText = data.message;
+          }
+      } catch (err) {
+          alert("Gagal memproses pengesahan masuk. Periksa sambungan API Google Apps Script anda.");
+      } finally {
+          showLoading(false);
+      }
+  }
+
+  function handleLogout() {
+      localStorage.removeItem("harian_phone");
+      location.reload();
+  }
+
+  async function setupDashboard() {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("main-app").style.display = "block";
+      document.getElementById("txt-user-phone").innerText = userSession.phone;
+      document.getElementById("stat-total-children").innerText = `${userSession.children.length} Orang`;
+
+      showLoading(true);
+      
+      allChildrenData = {};
+      let totalTargetReached = 0;
+
+      for (let child of userSession.children) {
+          try {
+              const res = await fetch(`${API_URL}?action=getData&phone=${userSession.phone}&child=${child}`);
+              const data = await res.json();
+              
+              let parsedStars = {};
+              if (data.stars) {
+                  if (typeof data.stars === 'string') {
+                      try { parsedStars = JSON.parse(data.stars); } catch(e) { parsedStars = {}; }
+                  } else if (typeof data.stars === 'object') {
+                      parsedStars = data.stars;
+                  }
+              }
+              
+              allChildrenData[child] = parsedStars;
+
+              daysOrder.forEach(day => {
+                  if((parsedStars[day] || 0) >= 20) {
+                      totalTargetReached++;
+                  }
+              });
+
+          } catch (e) {
+              console.error(`Gagal memuatkan data prestasi bagi ${child}:`, e);
+          }
+      }
+
+      document.getElementById("stat-target-reached").innerText = `${totalTargetReached} Kali`;
+      
+      renderChart();
+      renderSummaryRows();
+      showLoading(false);
+  }
+
+  function renderChart() {
+      const ctx = document.getElementById('weeklyChart').getContext('2d');
+      const colors = ['#2b6cb0', '#48bb78', '#ed8936', '#9f7aea', '#e53e3e'];
+      const datasets = userSession.children.map((child, idx) => {
+          const starData = allChildrenData[child] || {};
+          const dataPoints = daysOrder.map(day => starData[day] || 0);
+          
+          return {
+              label: child,
+              data: dataPoints,
+              borderColor: colors[idx % colors.length],
+              backgroundColor: colors[idx % colors.length] + '22',
+              borderWidth: 3,
+              tension: 0.3,
+              fill: true
+          };
+      });
+
+      if(chartInstance) {
+          chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+              labels: daysOrder,
+              datasets: datasets
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                  y: {
+                      beginAtZero: true,
+                      max: 20,
+                      title: { display: true, text: 'Jumlah Bintang (⭐)' }
+                  }
+              },
+              plugins: {
+                  legend: { position: 'top' }
+              }
+          }
+      });
+  }
+
+  function renderSummaryRows() {
+      const container = document.getElementById("child-summary-container");
+      container.innerHTML = "";
+
+      userSession.children.forEach(child => {
+          const starData = allChildrenData[child] || {};
+          const row = document.createElement("div");
+          row.className = "child-row";
+          
+          let badgesHTML = "";
+          daysOrder.forEach(day => {
+              const count = starData[day] || 0;
+              const isComplete = count >= 20;
+              badgesHTML += `<div class="day-badge ${isComplete ? 'complete' : ''}">${day}: ${count}⭐</div>`;
+          });
+
+          row.innerHTML = `
+              <div class="child-header">
+                  <div class="child-name">👦 ${child}</div>
+              </div>
+              <div class="day-badge-grid">
+                  ${badgesHTML}
+              </div>
+          `;
+          container.appendChild(row);
+      });
+  }
+
+  async function checkAutoLogin() {
+      const savedPhone = localStorage.getItem("harian_phone");
+      if (!savedPhone) return;
+
+      showLoading(true);
+      try {
+          const res = await fetch(`${API_URL}?action=login&phone=${savedPhone}&otp=AUTO`);
+          const data = await res.json();
+          
+          if (data.status === "success") {
+              userSession.phone = savedPhone;
+              userSession.children = data.children;
+              setupDashboard();
+          } else {
+              localStorage.removeItem("harian_phone");
+          }
+      } catch (err) {
+          console.error("Gagal melakukan proses masuk automatik:", err);
+      } finally {
+          showLoading(false);
+      }
+  }
+
+  window.addEventListener("DOMContentLoaded", checkAutoLogin);
+</script>
+</body>
+</html>

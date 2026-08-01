@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadual & Carta Bintang Anak</title>
-    <link rel="icon" type="image/png" href="web-logo.png">
+    <link type="image/png" rel="icon" href="web-logo.png">
     <style>
         :root {
             --primary: #2b6cb0;
@@ -20,7 +20,7 @@
         body { background-color: var(--background); color: var(--text); padding: 20px; line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
         .container { max-width: 900px; margin: 0 auto 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; }
         
-        /* Skrin Login */
+        /* Skrin Login Disamakan */
         .login-screen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
         .login-screen h2 { margin-bottom: 20px; color: var(--primary); }
         .form-group { margin-bottom: 15px; text-align: left; }
@@ -29,6 +29,11 @@
         .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn-login:hover { background: #235284; }
         .error-msg { color: var(--danger); font-size: 14px; margin-top: 10px; display: none; }
+
+        /* Pautan kecil ke Dashboard / Halaman Utama bawah login */
+        .login-nav-link { text-align: right; margin-top: 15px; }
+        .login-nav-link a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 13px; }
+        .login-nav-link a:hover { text-decoration: underline; }
 
         /* Profil Anak */
         .profile-bar { display: flex; justify-content: space-between; align-items: center; background: #edf2f7; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; }
@@ -81,54 +86,18 @@
         .modal-content { background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 400px; }
         .modal-content h2 { color: var(--success); margin-bottom: 10px; }
 
-        /* SPINNER LOADING OVERLAY */
         .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8); z-index: 999;
+            align-items: center; justify-content: center; flex-direction: column;
         }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #e2e8f0;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        .loading-text {
-            margin-top: 15px;
-            font-weight: bold;
-            color: var(--text);
-            font-size: 15px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-text { margin-top: 15px; font-weight: bold; color: var(--text); font-size: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* PERUBAHAN: GAYA REKAAN FOOTER DI SINI */
-        footer.site-footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 20px 0;
-            font-size: 13px;
-            color: #718096;
-            border-top: 1px solid #e2e8f0;
-            width: 100%;
-        }
-        footer.site-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: bold;
-        }
-        footer.site-footer a:hover {
-            text-decoration: underline;
-        }
+        footer.site-footer { margin-top: auto; text-align: center; padding: 20px 0; font-size: 13px; color: #718096; border-top: 1px solid #e2e8f0; width: 100%; }
+        footer.site-footer a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        footer.site-footer a:hover { text-decoration: underline; }
         
         @media (max-width: 600px) {
             .task-item { flex-direction: column; align-items: flex-start; }
@@ -139,15 +108,15 @@
 </head>
 <body>
 
-<!-- COMPONENT: LOADING OVERLAY -->
 <div id="loading-overlay" class="loading-overlay">
     <div class="spinner"></div>
     <div class="loading-text">Sedang memproses, sila tunggu...</div>
 </div>
 
-<!-- BLOK 1: SKRIN LOGIN -->
+<!-- SKRIN LOGIN -->
 <div id="login-screen" class="login-screen">
     <h2>Log Masuk Ibu Ayah</h2>
+    <p style="font-size: 13px; color: #718096; margin-bottom: 15px;">Gunakan no. telefon dan OTP yang sama untuk mengakses data anak anda.</p>
     <div class="form-group">
         <label>No. Telefon</label>
         <input type="tel" id="login-phone" placeholder="Contoh: 0123456789">
@@ -157,13 +126,15 @@
         <input type="tel" id="login-otp" placeholder="Masukkan 4 digit OTP">
     </div>
     <button class="btn-login" onclick="handleLogin()">Log Masuk</button>
-    <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div>
+    <div id="login-error" class="error-msg">No. Telefon atau OTP tidak padan!</div> 
+	
+    <div class="login-nav-link">
+        <a href="../dashboard">Ke Portal Dashboard →</a>
+    </div>
 </div>
 
-<!-- BLOK 2: KANDUNGAN UTAMA APLIKASI -->
+<!-- KANDUNGAN UTAMA APLIKASI -->
 <div id="main-app" class="container" style="display: none;">
-    
-    <!-- Bar Info Profil & Tukar Anak -->
     <div class="profile-bar">
         <div>
             <label for="child-selector" style="font-weight: bold; margin-right: 5px;">Rutin Anak:</label>
@@ -207,7 +178,7 @@
     <div class="task-list" id="task-container"></div>
 
     <div class="action-box">
-		<button id="btn-add-star" class="btn btn-star" onclick="addStarManual()">+ Beri 1 Bintang Khas ⭐</button>
+        <button id="btn-add-star" class="btn btn-star" onclick="addStarManual()">+ Beri 1 Bintang Khas ⭐</button>
         <button class="btn btn-reset" onclick="resetApp()">Reset Skor Anak Ini (Hari Ini)</button>
     </div>
 </div>
@@ -221,10 +192,9 @@
     </div>
 </div>
 
-<!-- PERUBAHAN: BLOK SEKSYEN FOOTER DI BAWAH Halaman -->
 <footer class="site-footer">
     <p>&copy; 2026 <strong>Jadual Harian Anak</strong>. Hak Cipta Terpelihara.</p>
-    <p>Dibangunkan khas oleh <a href="https://github.com/Augsrock/Jadual-harian-anak-netlify">augsrock</a> since 2026</p>
+    <p>Dibangunkan khas oleh <a href="https://github.com/Augsrock/Jadual-harian-anak-netlify">augsrock</a></p>
 </footer>
 
 <script>
@@ -247,34 +217,13 @@
   ];
   
   const specialActivities = {
-      Isnin: { 
-          title: "Cabaran Bijak Mengemas: Jom berlumba susun kasut, simpan beg sekolah, lipat baju kecil, dan asingkan mainan mengikut bekas.", 
-          focus: "Disiplin & Tanggungjawab" 
-      },
-      Selasa: { 
-          title: "Sesi Sembang Santai: Kongsi 3 perkara gembira atau kelakar di sekolah. Latihan: Pandang mata dan tunggu giliran bercakap.", 
-          focus: "Komunikasi & Hormat" 
-      },
-      Rabu: { 
-          title: "Roda Emosi & Relaksasi: Bercerita tentang perasaan hari ini. Latihan teknik bertenang (tarik nafas 4 saat & hembus perlahan).", 
-          focus: "Mengurus Emosi & Minda" 
-      },
-      Khamis: { 
-          title: "Pentas Bakat Cilik: Masa untuk tunjuk bakat! Buat persembahan mini 2-3 minit (nyanyi lagu kegemaran, cerita buku, atau buat lawak).", 
-          focus: "Keyakinan Diri" 
-      },
-      Jumaat: { 
-          title: "Misi Kebaikan Harian: Bantu ibu sediakan snek petang, hidangkan makanan untuk adik/kakak, dan ucap terima kasih dengan senyuman.", 
-          focus: "Nilai Murni & Empati" 
-      },
-      Sabtu: { 
-          title: "Projek Kreatif & Fokus: Sesi membina lego, menyusun puzzle bersama, atau aktiviti kraf tangan kreatif di meja.", 
-          focus: "Kesabaran & Kerja Kumpulan" 
-      },
-      Ahad: { 
-          title: "Persediaan Hero Esok: Kemas bilik tidur, susun buku teks & alat tulis ke dalam beg sekolah untuk minggu baharu.", 
-          focus: "Kesiapsiagaan & Adab Diri" 
-      }
+      Isnin: { title: "Cabaran Bijak Mengemas: Jom berlumba susun kasut, simpan beg sekolah, lipat baju kecil, dan asingkan mainan mengikut bekas.", focus: "Disiplin & Tanggungjawab" },
+      Selasa: { title: "Sesi Sembang Santai: Kongsi 3 perkara gembira atau kelakar di sekolah. Latihan: Pandang mata dan tunggu giliran bercakap.", focus: "Komunikasi & Hormat" },
+      Rabu: { title: "Roda Emosi & Relaksasi: Bercerita tentang perasaan hari ini. Latihan teknik bertenang (tarik nafas 4 saat & hembus perlahan).", focus: "Mengurus Emosi & Minda" },
+      Khamis: { title: "Pentas Bakat Cilik: Masa untuk tunjuk bakat! Buat persembahan mini 2-3 minit (nyanyi lagu kegemaran, cerita buku, atau buat lawak).", focus: "Keyakinan Diri" },
+      Jumaat: { title: "Misi Kebaikan Harian: Bantu ibu sediakan snek petang, hidangkan makanan untuk adik/kakak, dan ucap terima kasih dengan senyuman.", focus: "Nilai Murni & Empati" },
+      Sabtu: { title: "Projek Kreatif & Fokus: Sesi membina lego, menyusun puzzle bersama, atau aktiviti kraf tangan kreatif di meja.", focus: "Kesabaran & Kerja Kumpulan" },
+      Ahad: { title: "Persediaan Hero Esok: Kemas bilik tidur, susun buku teks & alat tulis ke dalam beg sekolah untuk minggu baharu.", focus: "Kesiapsiagaan & Adab Diri" }
   };
 
   let userSession = { phone: "", children: [], activeChild: "" };
@@ -325,7 +274,7 @@
               errorDiv.innerText = data.message;
           }
       } catch (err) {
-          alert("Gagal menghubungi API rahsia Netlify. Pastikan Environment Variable dikemaskini.");
+          alert("Gagal menghubungi API. Pastikan Environment Variable dikemaskini.");
       } finally {
           showLoading(false);
       }
@@ -362,18 +311,12 @@
           const data = await res.json();
           
           if (data.stars && typeof data.stars === 'string') {
-              try {
-                  appState.stars = JSON.parse(data.stars);
-              } catch(e) {
-                  appState.stars = {};
-              }
+              try { appState.stars = JSON.parse(data.stars); } catch(e) { appState.stars = {}; }
           } else if (data.stars && typeof data.stars === 'object') {
               appState.stars = data.stars;
           } else {
               appState.stars = {};
-              if (typeof data.stars === 'number') {
-                  appState.stars[currentDay] = data.stars;
-              }
+              if (typeof data.stars === 'number') appState.stars[currentDay] = data.stars;
           }
 
           appState.completedTasks = data.completedTasks || {};
@@ -534,13 +477,9 @@
   window.resetApp = async function() {
       if (confirm(`Adakah anda pasti mahu set semula rekod bintang & tugasan bagi ${userSession.activeChild} pada hari ${currentDay}?`)) {
           setCurrentDayStars(0);
-          
           for (let key in appState.completedTasks) {
-              if (key.startsWith(`${currentDay}-`)) {
-                  appState.completedTasks[key] = false;
-              }
+              if (key.startsWith(`${currentDay}-`)) appState.completedTasks[key] = false;
           }
-          
           showLoading(true);
           await saveProgress();
           renderTasks();
@@ -563,7 +502,6 @@
               userSession.phone = savedPhone;
               userSession.children = data.children;
               userSession.activeChild = data.activeChild || data.children[0];
-              
               setupUIApp();
           } else {
               localStorage.removeItem("harian_phone");
